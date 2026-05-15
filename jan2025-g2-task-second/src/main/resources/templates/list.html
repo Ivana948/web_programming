@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <title>national park List</title>
+</head>
+<body>
+
+<div>
+    <!-- The form below should invoke the method NationalParkController.listAll -->
+    <form id="filter-form" th:action="@{/national-parks}" th:method="get">
+        <label for="name">National Park Name</label>
+        <input id="name" type="text" name="name" th:value="${name}"/>
+
+        <label for="areaSize">National Park Area Size (in square meters)</label>
+        <input id="areaSize" type="number" name="areaSize" th:value="${areaSize}"/>
+
+        <label for="rating">Rating</label>
+        <input id="rating" type="number" step="0.1" min="0" max="10" name="rating" th:value="${rating}"/>
+
+        <label for="parkType">National Park Type</label>
+        <select id="parkType" name="parkType">
+            <option value="">All</option>
+            <!-- For each ParkType you should have one <option> like below  -->
+            <option>[parkType]</option>
+            <option th:each="parkT : ${parkTypes}"
+                    th:value="${parkT}"
+                    th:text="${parkT}"
+                    th:selected="${parkType != null && parkType == parkT}">
+            </option>
+        </select>
+
+        <label for="location">ParkLocation</label>
+        <select id="location" name="locationId">
+            <option value="">All</option>
+            <!-- For each location you should have one <option> like below  -->
+            <option>[location.country], [location.continent]</option>
+            <option th:each="loc : ${locations}"
+                    th:value="${loc.id}"
+                    th:text="${loc.country + ',' + loc.continent}"
+                    th:selected="${locationId != null && locationId == loc.id}">
+            </option>
+        </select>
+
+        <button id="filter" type="submit">Filter</button>
+    </form>
+
+    <div>
+        <!-- NationalParkController.showAdd -->
+        <a href="/national-parks/add" sec:authorize="hasRole('ADMIN')" class="add-item">Add new national park</a>
+    </div>
+
+    <table>
+        <tr>
+            <th>National Park</th>
+            <th>Area Size</th>
+            <th>Rating</th>
+            <th>National Park Type</th>
+            <th>ParkLocation</th>
+            <th>Open/Closed</th>
+            <th>Actions</th>
+        </tr>
+        <!-- For each national parkT you should have one <tr> like below -->
+        <tr th:each="park : ${page.getContent()}" class="item">
+            <td th:text="${park.name}">[park.name]</td>
+            <td th:text="${park.areaSize}">[park.areaSize]</td>
+            <td th:text="${park.rating}">[park.rating]</td>
+            <td th:text="${park.parkType}">[park.parkType]</td>
+            <td th:text="${park.location.country + ',' + park.location.continent}">[park.location.country], [park.location.continent]</td>
+            <td th:text="${park.closed ? 'CLOSED' : 'OPEN'}">[park.closed] -> OPEN/CLOSED</td>
+            <td>
+                <!-- NationalParkController.edit -->
+                <a th:href="@{'/national-parks/edit/{id}' (id=${park.id})}" sec:authorize="hasRole('ADMIN')" class="edit-item">Edit</a>
+
+                <!-- NationalParkController.delete -->
+                <form th:method="post" th:action="@{'/national-parks/delete/{id}' (id=${park.id})}" sec:authorize="hasRole('ADMIN')">
+                    <button type="submit" class="delete-item">Delete</button>
+                </form>
+
+                <!-- NationalParkController.close -->
+                <form th:method="post" th:action="@{'/national-parks/close/{id}' (id=${park.id})}" th:if="${!park.closed}" sec:authorize="hasRole('ADMIN')">
+                    <button type="submit" class="close-item">Close</button>
+                </form>
+
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div>
+    <ul id="nav">
+        <li><a href="/">Home</a></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+</div>
+
+</body>
+</html>
